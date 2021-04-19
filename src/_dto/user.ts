@@ -13,3 +13,14 @@ export class UserDto {
   readonly updatedAt: Date;
   readonly deletedAt: Date;
 }
+
+export class LoginUserDto {
+  id?: number;
+  email: string;
+  password: string;
+
+  constructor(email: string, password: string) {
+    this.email = email;
+    this.password = password;
+  }
+}

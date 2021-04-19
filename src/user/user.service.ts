@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/_models/user.entity';
 import md5 from 'md5-hash';
+import { LoginUserDto } from 'src/_dto/user';
 
 @Injectable()
 export class UserService {
@@ -14,7 +15,7 @@ export class UserService {
    */
   async checkEmailUse(email: string): Promise<User> {
     try {
-      const user = await this.USER_REPOSITORY.findOne({
+      const user: User = await this.USER_REPOSITORY.findOne({
         where: {
           email: email,
         },
@@ -47,6 +48,29 @@ export class UserService {
       user.password = md5(user.password);
       const save = await this.USER_REPOSITORY.create<User>(user);
       return save;
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status ? error.status : HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Bir kullanıcının email ve şifre ile login olmasını sağlar
+   * @param user LoginUserDto tipinde login bilgisi
+   * @returns Varsa kullanıcı, yoksa null
+   */
+
+  async findOneByUsernameAndPassword(user: LoginUserDto): Promise<User> {
+    try {
+      user.password = md5(user.password);
+      return await this.USER_REPOSITORY.findOne({
+        where: {
+          email: user.email,
+          password: user.password,
+        },
+      });
     } catch (error) {
       throw new HttpException(
         error.message,
