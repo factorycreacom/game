@@ -8,14 +8,13 @@ import {
   Post,
   UseGuards,
   Body,
-  SetMetadata,
   Req,
   HttpException,
   Put,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CommonResult } from 'src/_dto/common-result';
-import { ChangePasswordDto, UserDto } from 'src/_dto/user';
+import { ChangePasswordDto } from 'src/_dto/user';
 import { User } from 'src/_models/user.entity';
 import { UserService } from './user.service';
 
