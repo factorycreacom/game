@@ -7,8 +7,9 @@ export class UserDto {
   birthdate: Date;
   city: number;
   job: string;
-  phone: number;
+  phone: string;
   status: number;
+  role?: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
   readonly deletedAt: Date;

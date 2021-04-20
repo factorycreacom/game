@@ -12,9 +12,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  public async validateUser(user: LoginUserDto): Promise<User> {
+  public async validateUser(user: LoginUserDto): Promise<UserDto> {
     try {
-      const existedUser: User = await this.usersService.findOneByUsernameAndPassword(
+      const existedUser: UserDto = await this.usersService.findOneByUsernameAndPassword(
         user,
       );
       return existedUser || null;
@@ -30,6 +30,7 @@ export class AuthService {
       name: user.name,
       surname: user.surname,
       status: user.status,
+      role: user.role,
     };
     return {
       expireTime: '1Y',
