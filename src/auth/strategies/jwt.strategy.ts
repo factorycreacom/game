@@ -14,8 +14,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(
     payload: JwtVerifyAnswer,
-  ): Promise<{ email: string; id: number; role: string }> {
-    return { email: payload.email, id: payload.id, role: payload.role };
+  ): Promise<{
+    email: string;
+    id: number;
+    role: string;
+    name: string;
+    surname: string;
+    exp: number;
+    iat: number;
+  }> {
+    return {
+      email: payload.email,
+      id: payload.id,
+      role: payload.role,
+      name: payload.name,
+      surname: payload.surname,
+      exp: payload.exp,
+      iat: payload.iat,
+    };
   }
 }
 
@@ -25,4 +41,6 @@ export interface JwtVerifyAnswer {
   email: string;
   id: number;
   role: string;
+  name: string;
+  surname: string;
 }

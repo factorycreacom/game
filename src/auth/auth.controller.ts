@@ -43,7 +43,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @Get('/get-profile')
+  @Get('/me')
   async getProfile(@Req() request): Promise<any> {
     return request.user;
   }
