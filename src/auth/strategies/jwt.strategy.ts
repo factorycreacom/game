@@ -20,6 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     role: string;
     name: string;
     surname: string;
+    expiration: string;
     exp: number;
     iat: number;
   }> {
@@ -29,6 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       role: payload.role,
       name: payload.name,
       surname: payload.surname,
+      expiration: payload.expiration,
       exp: payload.exp,
       iat: payload.iat,
     };
@@ -43,4 +45,5 @@ export interface JwtVerifyAnswer {
   role: string;
   name: string;
   surname: string;
+  expiration: string;
 }

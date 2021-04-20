@@ -10,6 +10,7 @@ export class UserDto {
   phone: string;
   status: number;
   role?: string;
+  expiration: Date;
   readonly createdAt: Date;
   readonly updatedAt: Date;
   readonly deletedAt: Date;

@@ -95,6 +95,11 @@ export class User extends Model<User> {
   })
   role: string;
 
+  @Column({
+    allowNull: false,
+  })
+  expiration: Date;
+
   @CreatedAt public createdAt: Date;
   @UpdatedAt public updatedAt: Date;
   @DeletedAt public deletedAt: Date;

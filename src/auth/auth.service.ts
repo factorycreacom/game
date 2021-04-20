@@ -31,6 +31,7 @@ export class AuthService {
       surname: user.surname,
       status: user.status,
       role: user.role,
+      expiration: user.expiration,
     };
     return {
       expireTime: '1Y',
