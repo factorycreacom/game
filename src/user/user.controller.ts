@@ -11,9 +11,11 @@ import {
   SetMetadata,
   Req,
   HttpException,
+  Put,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CommonResult } from 'src/_dto/common-result';
-import { UserDto } from 'src/_dto/user';
+import { ChangePasswordDto, UserDto } from 'src/_dto/user';
 import { User } from 'src/_models/user.entity';
 import { UserService } from './user.service';
 
@@ -52,6 +54,36 @@ export class UserController {
       throw new HttpException(
         new CommonResult(false, 'Server error, try later'),
         HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/edit')
+  async editUser(@Req() request): Promise<CommonResult> {
+    try {
+      await this.userService.updateUser(request.body, request.user.id);
+      return new CommonResult(true, 'Bilgiler Başarıyla güncellendi.');
+    } catch (error) {
+      throw new HttpException(
+        new CommonResult(false, 'Server error'),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/change-password')
+  async changePassword(
+    @Req() request,
+    @Body() params: ChangePasswordDto,
+  ): Promise<any> {
+    try {
+      return await this.userService.changePassword(params, request.user.id);
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status ? error.status : HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

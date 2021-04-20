@@ -16,6 +16,11 @@ export class UserDto {
   readonly deletedAt: Date;
 }
 
+export class ChangePasswordDto {
+  password: string;
+  new_password?: string;
+}
+
 export class LoginUserDto {
   id?: number;
   email: string;

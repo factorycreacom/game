@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/_models/user.entity';
 import md5 from 'md5-hash';
-import { LoginUserDto } from 'src/_dto/user';
+import { ChangePasswordDto, LoginUserDto, UserDto } from 'src/_dto/user';
+import { CommonResult } from 'src/_dto/common-result';
 
 @Injectable()
 export class UserService {
@@ -54,6 +55,61 @@ export class UserService {
         error.status ? error.status : HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  /**
+   * !NOT! BURANIN GÜVENLİK NEDENİYLE GÜNCELLENMESİ LAZIM. TÜM VERİLERİ GÜNCELLETMEK DOĞRU DEĞİL. EXPIRATION DATASINI DEĞİTİREBİLİR
+   * Mevcut kullanıcının güncellenmesini sağlar
+   * @param data Güncellenecek bilgiler
+   * @param id Güncellenecek kullanıcı ID
+   * @returns true or false
+   */
+
+  async updateUser(
+    data: UserDto | ChangePasswordDto,
+    id: number,
+  ): Promise<boolean> {
+    await this.USER_REPOSITORY.update<User>(data, {
+      where: { id: id },
+    });
+    return true;
+  }
+
+  /**
+   * Bir kullanıcının yeni şifre belirlemesini sağlar
+   * @param data Şifre değiştirmek için gerekli olan bilgiler
+   * @param id Şifre değişecek kullanıcı ID
+   */
+  async changePassword(
+    data: ChangePasswordDto,
+    id: number,
+  ): Promise<CommonResult> {
+    data.password = md5(data.password);
+    data.new_password = md5(data.new_password);
+    const user: User = await this.finOneByUserId(id);
+
+    if (user && user.password == data.password) {
+      const object: ChangePasswordDto = {
+        password: data.new_password,
+      };
+
+      await this.updateUser(object, id);
+      return new CommonResult(true, 'Şifreniz başarıyla güncellenmiştir.');
+    } else {
+      throw new HttpException(
+        new CommonResult(false, 'Şifreniz uyuşmuyor!'),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * ID'ye göre kullanıcı verisini döndürür.
+   * @param id Kullanıcı ID'si
+   * @returns  Varsa Kullanıcı verisi yoksa null;
+   */
+  async finOneByUserId(id: number): Promise<User> {
+    return await this.USER_REPOSITORY.findOne({ where: { id: id } });
   }
 
   /**
