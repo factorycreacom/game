@@ -38,6 +38,11 @@ export class AuthService {
       value: this.jwtService.sign(payload),
     };
   }
+
+  public decode(token: string) {
+    const decoded = this.jwtService.decode(token);
+    return decoded ? decoded : false;
+  }
 }
 
 export interface AccessToken {
