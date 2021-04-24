@@ -8,9 +8,10 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from './auth/auth.service';
 import { WsGuard } from './auth/guards/ws-auth.guard';
+import { ChatService } from './chat/chat.service';
 @WebSocketGateway()
 export class ChatGateway implements OnModuleInit, OnGatewayConnection {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private chatService: ChatService) {}
   @WebSocketServer()
   server: Server;
 
@@ -18,30 +19,58 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
     console.log('INİT');
   }
 
+  /**
+   * Kullanıcı ilk bağlandığında token geçerliliğini kontrol edip ona göre true false döndüreceğiz.
+   */
+
   handleConnection(client: Socket) {
-    console.log('GELDI');
     const token = client.handshake.query.token.toString();
     const veri: any = this.authService.decode(token);
-    console.log(veri);
+    let returned: boolean;
+    if(veri){
+      returned = true;
+    }else{
+      returned = false;
+    }
     const socketData = {
-      message: 'Hoş geldiniz',
+      message: returned,
     };
-    client.emit('welcome', socketData);
-  }
-
-  @SubscribeMessage('test')
-  async test(client: Socket, data: any) {
-    console.log('TEST');
-    return data;
+    client.emit('login', socketData);
+    client.emit('message', {username: 'Sistem', text: 'Hoş geldiniz'} )
   }
 
   @UseGuards(WsGuard)
-  @SubscribeMessage('i am client')
-  async message(client: Socket, data: any) {
-    /** Socket Kullanıcısının adını bulma
-     * this.server.sockets['connected'][client.id].handshake.query.user,
-     * */
-
-    return data;
+  @SubscribeMessage('joinRoom')
+  async joinroom(client: Socket, data: string) {
+   try {
+      client.join(data);
+      const clientIdList: string[] = await new Promise(resolve => {
+        console.log(this.server.sockets['clients'])
+      })
+      return { event: 'connectedRoom'};
+   } catch (error) {
+    return { event: 'notConnectedRoom'};
+   }
   }
+
+  @UseGuards(WsGuard)
+  @SubscribeMessage('message')
+  async message(client: Socket, data: any): Promise<GatewayEventInterface<{ text: string, username: string, room: string }>>  {
+
+    const token = client.handshake.query.token.toString();
+    const user: any = this.authService.decode(token);
+    data.username = user.email;
+
+    this.chatService.addMessageRomm(data)
+
+    const event = 'message';
+    const payload = { text: data.text, username: data.username};
+    client.to(data.room).emit(event, payload);
+    return { event, data: payload };
+  }
+}
+
+interface GatewayEventInterface<T> {
+  event: string;
+  data: any;
 }

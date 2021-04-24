@@ -11,7 +11,7 @@ export class CommonResult<T = null> {
     success: boolean,
     message?: string,
     title?: string,
-    additionalInfo?: T,
+    additionalInfo?: any,
   ) {
     this.success = success;
     this.message = message;
