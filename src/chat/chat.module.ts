@@ -8,7 +8,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { RoomSchema } from 'src/schemas/room.schema';
 
 @Module({
-  imports: [AuthModule,MongooseModule.forFeature([{ name: 'Room', schema: RoomSchema }])],
+  imports: [
+    AuthModule,
+    MongooseModule.forFeature([{ name: 'Room', schema: RoomSchema }]),
+  ],
   controllers: [ChatController],
   providers: [ChatService, ChatGateway],
 })
