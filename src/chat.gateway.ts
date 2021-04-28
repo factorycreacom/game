@@ -11,7 +11,10 @@ import { WsGuard } from './auth/guards/ws-auth.guard';
 import { ChatService } from './chat/chat.service';
 @WebSocketGateway()
 export class ChatGateway implements OnModuleInit, OnGatewayConnection {
-  constructor(private authService: AuthService, private chatService: ChatService) {}
+  constructor(
+    private authService: AuthService,
+    private chatService: ChatService,
+  ) {}
   @WebSocketServer()
   server: Server;
 
@@ -27,44 +30,48 @@ export class ChatGateway implements OnModuleInit, OnGatewayConnection {
     const token = client.handshake.query.token.toString();
     const veri: any = this.authService.decode(token);
     let returned: boolean;
-    if(veri){
+    if (veri) {
       returned = true;
-    }else{
+    } else {
       returned = false;
     }
     const socketData = {
       message: returned,
     };
     client.emit('login', socketData);
-    client.emit('message', {username: 'Sistem', text: 'Hoş geldiniz'} )
+    client.emit('message', { username: 'Sistem', text: 'Hoş geldiniz' });
   }
 
   @UseGuards(WsGuard)
   @SubscribeMessage('joinRoom')
   async joinroom(client: Socket, data: string) {
-   try {
+    try {
       client.join(data);
-      const clientIdList: string[] = await new Promise(resolve => {
-        console.log(this.server.sockets['clients'])
-      })
-      return { event: 'connectedRoom'};
-   } catch (error) {
-    return { event: 'notConnectedRoom'};
-   }
+      const clientIdList: string[] = await new Promise((resolve) => {
+        console.log(this.server.sockets['clients']);
+      });
+      return { event: 'connectedRoom' };
+    } catch (error) {
+      return { event: 'notConnectedRoom' };
+    }
   }
 
   @UseGuards(WsGuard)
   @SubscribeMessage('message')
-  async message(client: Socket, data: any): Promise<GatewayEventInterface<{ text: string, username: string, room: string }>>  {
-
+  async message(
+    client: Socket,
+    data: any,
+  ): Promise<
+    GatewayEventInterface<{ text: string; username: string; room: string }>
+  > {
     const token = client.handshake.query.token.toString();
     const user: any = this.authService.decode(token);
     data.username = user.email;
 
-    this.chatService.addMessageRomm(data)
+    this.chatService.addMessageRomm(data);
 
     const event = 'message';
-    const payload = { text: data.text, username: data.username};
+    const payload = { text: data.text, username: data.username };
     client.to(data.room).emit(event, payload);
     return { event, data: payload };
   }
